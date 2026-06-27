@@ -38,7 +38,7 @@
 <body>
 
     <div class="search-container">
-        <input type="text" id="city-search" placeholder="Поиск города (напр. Нижний Тагил)...">
+        <input type="text" id="city-search" placeholder="Поиск города (напр. Берёзовский)...">
         <button onclick="locateUser()">📍 Найти меня</button>
     </div>
 
@@ -97,7 +97,6 @@
             if (e.key === 'Enter') {
                 const query = this.value;
                 if(!query) return;
-                // Сужаем область поиска до Свердловской области для точности
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Свердловская область')}`)
                     .then(res => res.json())
                     .then(data => {
