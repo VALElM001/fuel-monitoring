@@ -8,6 +8,9 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn { display: block; width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 6px; cursor: pointer; color: white; text-align: center; text-decoration: none; font-weight: bold; }
+        /* Стили для разных кнопок */
+        .btn-maps { background: #e67e22; }
+        .btn-multigo { background: #27ae60; }
     </style>
 </head>
 <body>
@@ -20,7 +23,10 @@
                     <h3>${azs.name}</h3>
                     <p>📍 ${azs.address}</p>
                     <small>${azs.info}</small>
-                    <a class="btn" style="background:#e67e22" href="https://yandex.ru/maps/?rtext=~${azs.lat},${azs.lng}" target="_blank">⛽ Открыть на картах</a>
+                    
+                    <a class="btn btn-maps" href="https://yandex.ru/maps/?rtext=~${azs.lat},${azs.lng}" target="_blank">⛽ Открыть на картах</a>
+                    
+                    <a class="btn btn-multigo" href="https://multigo.ru/map?lat=${azs.lat}&lon=${azs.lng}" target="_blank">💰 MultiGO Топливо</a>
                 </div>
             `).join('');
         });
