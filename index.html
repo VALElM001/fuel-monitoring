@@ -2,27 +2,47 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мониторинг АЗС</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Кнопки всегда внизу */
+        body { font-family: sans-serif; background: #f4f7f6; padding: 10px; margin: 0; }
+        h1 { text-align: center; font-size: 1.5rem; }
+
+        /* Адаптивная сетка */
+        .grid { 
+            display: grid; 
+            gap: 15px; 
+            /* Смартфоны (по умолчанию) - 1 колонка */
+            grid-template-columns: 1fr; 
         }
-        .btn { display: block; width: 100%; padding: 12px; margin-top: 8px; border: none; border-radius: 6px; cursor: pointer; color: white; text-align: center; text-decoration: none; font-weight: bold; box-sizing: border-box; }
+
+        /* Планшеты - 2 колонки */
+        @media (min-width: 600px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ПК - 3 или 4 колонки */
+        @media (min-width: 1024px) {
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .card { 
+            background: white; padding: 15px; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .btn { 
+            display: block; width: 100%; padding: 14px; margin-top: 10px; 
+            border: none; border-radius: 8px; cursor: pointer; color: white; 
+            text-align: center; text-decoration: none; font-weight: bold; 
+            font-size: 16px; /* Крупный шрифт для удобства нажатия пальцем */
+        }
         
-        .address-text { cursor: pointer; color: #2980b9; text-decoration: underline; margin: 10px 0; }
+        .address-text { cursor: pointer; color: #2980b9; text-decoration: underline; margin: 10px 0; font-size: 0.9rem; }
         
         .btn-maps { background: #e67e22; }
         .btn-multigo { background: #27ae60; }
-        
-        h3 { min-height: 40px; margin-top: 0; }
     </style>
 </head>
 <body>
@@ -32,7 +52,7 @@
     <script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert("Адрес скопирован: " + text);
+                alert("Адрес скопирован!");
             });
         }
 
