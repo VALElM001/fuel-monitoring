@@ -1,10 +1,8 @@
 import json
+import urllib.parse
 from datetime import datetime, timedelta
 
 def get_exact_fuel_data():
-    # Настройка времени для Екатеринбурга
-    tz_ekb = datetime.utcnow() + timedelta(hours=5)
-    current_time = tz_ekb.strftime("%d.%m %H:%M")
     
     # Полный список АЗС с добавленным полем "city"
     stations = [
