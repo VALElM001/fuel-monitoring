@@ -8,41 +8,58 @@
         body { font-family: sans-serif; background: #f4f7f6; padding: 10px; margin: 0; }
         h1 { text-align: center; font-size: 1.5rem; }
 
-        /* Адаптивная сетка */
         .grid { 
             display: grid; 
             gap: 15px; 
-            /* Смартфоны (по умолчанию) - 1 колонка */
             grid-template-columns: 1fr; 
         }
 
-        /* Планшеты - 2 колонки */
-        @media (min-width: 600px) {
-            .grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        /* ПК - 3 или 4 колонки */
-        @media (min-width: 1024px) {
-            .grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
         .card { 
-            background: white; padding: 15px; border-radius: 12px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; justify-content: space-between;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            /* Исправляет баг "раздувания" карточки */
+            min-width: 0; 
+            box-sizing: border-box;
         }
 
         .btn { 
-            display: block; width: 100%; padding: 14px; margin-top: 10px; 
-            border: none; border-radius: 8px; cursor: pointer; color: white; 
-            text-align: center; text-decoration: none; font-weight: bold; 
-            font-size: 16px; /* Крупный шрифт для удобства нажатия пальцем */
+            display: block; 
+            width: 100%; 
+            padding: 14px 0; /* Убрали горизонтальный отступ */
+            margin-top: 10px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            color: white; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 16px; 
+            /* Критично: кнопка не будет вылезать за края */
+            box-sizing: border-box; 
         }
         
-        .address-text { cursor: pointer; color: #2980b9; text-decoration: underline; margin: 10px 0; font-size: 0.9rem; }
+        .address-text { 
+            cursor: pointer; 
+            color: #2980b9; 
+            text-decoration: underline; 
+            margin: 10px 0; 
+            font-size: 0.9rem; 
+            word-wrap: break-word; /* Перенос длинного текста */
+        }
         
         .btn-maps { background: #e67e22; }
         .btn-multigo { background: #27ae60; }
+        
+        h3 { margin-top: 0; overflow-wrap: break-word; }
     </style>
 </head>
 <body>
