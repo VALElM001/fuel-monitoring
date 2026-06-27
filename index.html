@@ -82,9 +82,15 @@
             })
             .then(azsData => {
                 azsData.forEach(azs => {
-                    const marker = L.marker([azs.lat, azs.lng], { icon: getMarkerIcon(azs.status) })
-                                    .bindPopup(azs.info);
-                    markersGroup.addLayer(marker);
+                    // Принудительно преобразуем lat и lng в тип Number, чтобы исключить баги с координатами
+                    const lat = parseFloat(azs.lat);
+                    const lng = parseFloat(azs.lng);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const marker = L.marker([lat, lng], { icon: getMarkerIcon(azs.status) })
+                                        .bindPopup(azs.info);
+                        markersGroup.addLayer(marker);
+                    }
                 });
                 map.addLayer(markersGroup);
             })
