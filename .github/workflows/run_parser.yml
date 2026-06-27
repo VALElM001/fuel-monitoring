@@ -1,0 +1,35 @@
+name: Update Fuel Data
+
+on:
+  schedule:
+    # Запуск каждый час (выражение Крон)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Позволяет запускать скрипт вручную кнопкой в панели GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Проверка репозитория
+      uses: actions/checkout@v3
+
+    - name: Настройка Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Установка зависимостей
+      run: |
+        pip install requests
+
+    - name: Запуск парсера бензина
+      run: python parser.py
+
+    - name: Коммит и Пуш обновленных данных в репозиторий
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add data.json
+        git commit -m "Авто-обновление данных АЗС [skip ci]" || echo "Нет изменений для коммита"
+        git push
