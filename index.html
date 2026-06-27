@@ -7,47 +7,35 @@
     <style>
         body { font-family: sans-serif; background: #f4f7f6; padding: 10px; margin: 0; }
         h1 { text-align: center; font-size: 1.5rem; }
-
-        /* Стили для вкладок */
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: 1px solid #ddd; border-radius: 20px; background: white; transition: 0.3s; }
         .tab-btn.active { background: #3498db; color: white; border-color: #3498db; }
-
         .grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
         @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-width: 0; box-sizing: border-box; }
         .btn { display: block; width: 100%; padding: 12px 0; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; color: white; text-align: center; text-decoration: none; font-weight: bold; font-size: 14px; box-sizing: border-box; }
-        
         .address-text { cursor: pointer; color: #2980b9; text-decoration: underline; margin: 10px 0; font-size: 0.9rem; word-wrap: break-word; }
         .btn-maps { background: #e67e22; }
-        .btn-tbank { background: #FFD700; color: #000; } /* Желтая кнопка Т-Банка */
+        .btn-tbank { background: #FFD700; color: #000; border: none; font-family: sans-serif; }
     </style>
 </head>
 <body>
     <h1>Актуальные АЗС</h1>
-    
     <div class="tabs">
         <button class="tab-btn active" onclick="filterStations('Все', this)">Все</button>
         <button class="tab-btn" onclick="filterStations('Берёзовский', this)">Берёзовский</button>
         <button class="tab-btn" onclick="filterStations('Екатеринбург', this)">Екатеринбург</button>
     </div>
-
     <div class="grid" id="list">Загрузка данных...</div>
 
     <script>
         let fullData = [];
-
-        fetch('data.json').then(r => r.json()).then(data => {
-            fullData = data;
-            render(data);
-        });
+        fetch('data.json').then(r => r.json()).then(data => { fullData = data; render(data); });
 
         function filterStations(city, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             const filtered = (city === 'Все') ? fullData : fullData.filter(s => s.city === city);
             render(filtered);
         }
@@ -62,10 +50,20 @@
                     </div>
                     <div>
                         <a class="btn btn-maps" href="https://yandex.ru/maps/?rtext=~${azs.lat},${azs.lng}" target="_blank">⛽ Открыть на картах</a>
-                        <a class="btn btn-tbank" href="tbank://fuel/map">💰 Т-Банк Топливо</a>
+                        <button class="btn btn-tbank" onclick="openTBank('${azs.tbank_link}')">💰 Т-Банк Топливо</button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function openTBank(url) {
+            const start = Date.now();
+            window.location.href = url;
+            setTimeout(() => {
+                if (Date.now() - start < 1700) {
+                    window.open('https://www.tbank.ru/fuel/', '_blank');
+                }
+            }, 1500);
         }
 
         function copyToClipboard(text) {
