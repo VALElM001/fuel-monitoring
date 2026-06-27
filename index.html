@@ -53,11 +53,12 @@
 
         .search-box {
             margin-bottom: 15px;
+            position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px 40px 12px 15px;
             border: 1px solid #ddd;
             border-radius: 10px;
             font-size: 16px;
@@ -69,6 +70,19 @@
 
         .search-input:focus {
             border-color: var(--button-bg);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
         }
 
         .filter-buttons {
@@ -210,6 +224,7 @@
     <div class="container">
         <div class="search-box">
             <input type="text" id="search-input" class="search-input" placeholder="Поиск по названию или адресу...">
+            <button id="clear-search" class="clear-search" onclick="clearSearchInput()">✕</button>
         </div>
 
         <div class="filter-buttons">
@@ -243,37 +258,59 @@
                 console.error(error);
             });
 
-        // Функция построения маршрута в зависимости от устройства
+        // НАДЕЖНАЯ ФУНКЦИЯ ПЕРЕХОДА И ПОСТРОЕНИЯ МАРШРУТА
         function openMapRoute(lat, lng, name) {
             const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
+            const encodedName = encodeURIComponent(name);
+
             if (isMobile) {
-                // Пытаемся открыть Яндекс.Навигатор, если установлен, иначе Google Карты
-                window.location.href = `yandexnavi://build_route_on_map?lat_to=${lat}&lon_to=${lng}`;
+                // На смартфонах передаем точный запрос для открытия во встроенном приложении Яндекс.Навигаторе
+                window.location.href = `yandexnavi://show_point_on_map?lat=${lat}&lon=${lng}&zoom=16&desc=${encodedName}`;
+                
+                // Если навигатора нет, открываем мобильный браузер с поисковой координатной меткой
                 setTimeout(() => {
-                    window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
-                }, 500);
+                    window.open(`https://maps.yandex.ru/?text=${lat},${lng}`, '_blank');
+                }, 400);
             } else {
-                // На ПК открываем веб-версию Яндекс.Карт с точкой
-                window.open(`https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`, '_blank');
+                // На ПК открываем веб-карты Яндекса по точной строке координат — адрес определится сам
+                window.open(`https://yandex.ru/maps/?text=${lat},${lng}`, '_blank');
             }
+        }
+
+        // Очистка строки поиска
+        function clearSearchInput() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            document.getElementById('clear-search').style.display = 'none';
+            renderStations();
         }
 
         // Рендеринг списка карточек
         function renderStations() {
             const container = document.getElementById('list-container');
-            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const searchInput = document.getElementById('search-input');
+            const searchQuery = searchInput.value.toLowerCase();
+            const clearBtn = document.getElementById('clear-search');
+            
+            // Скрываем/показываем крестик очистки
+            clearBtn.style.display = searchQuery ? 'block' : 'none';
             
             container.innerHTML = '';
 
-            const filtered = allStationsData.filter(azs => {
+            // 1. Фильтруем массив по поиску и кнопкам
+            let filtered = allStationsData.filter(azs => {
                 const matchesFilter = currentFilter === 'all' || azs.status === currentFilter;
-                
-                // Вытаскиваем текст адреса из тегов для чистого поиска
                 const cleanText = azs.info.replace(/<\/?[^>]+(>|$)/g, "").toLowerCase();
                 const matchesSearch = azs.name.toLowerCase().includes(searchQuery) || cleanText.includes(searchQuery);
                 
                 return matchesFilter && matchesSearch;
+            });
+
+            // 2. ПОЛЕЗНОЕ УЛУЧШЕНИЕ: Сортируем (available вперед, empty назад)
+            filtered.sort((a, b) => {
+                if (a.status === 'available' && b.status === 'empty') return -1;
+                if (a.status === 'empty' && b.status === 'available') return 1;
+                return 0;
             });
 
             if (filtered.length === 0) {
@@ -283,9 +320,8 @@
 
             filtered.forEach(azs => {
                 const isAvailable = azs.status === 'available';
-                const statusText = isAvailable ? 'Бензин в наличии' : 'Ограничения / Слив';
+                const statusText = isAvailable ? 'Бenзин в наличии' : 'Ограничения / Слив';
                 
-                // Извлекаем строку адреса (все, что после "📍 Адрес: " до следующего переноса или тега)
                 let address = "Свердловская область";
                 const addrMatch = azs.info.match(/📍 Адрес:\s*([^<]+)/);
                 if (addrMatch && addrMatch[1]) {
@@ -302,14 +338,13 @@
                     <p class="azs-address">📍 ${address}</p>
                     <div class="azs-info-text">${azs.info}</div>
                     <button class="route-btn" onclick="openMapRoute(${azs.lat}, ${azs.lng}, '${azs.name}')">
-                        🚗 Построить маршрут на картах
+                        🚗 Открыть заправку на картах
                     </button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Фильтрация по статусу (кнопки)
         function filterStatus(status, buttonElement) {
             currentFilter = status;
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -317,7 +352,6 @@
             renderStations();
         }
 
-        // Живой поиск при вводе текста
         document.getElementById('search-input').addEventListener('input', renderStations);
     </script>
 </body>
