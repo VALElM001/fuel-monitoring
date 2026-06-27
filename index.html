@@ -8,88 +8,69 @@
         body { font-family: sans-serif; background: #f4f7f6; padding: 10px; margin: 0; }
         h1 { text-align: center; font-size: 1.5rem; }
 
-        .grid { 
-            display: grid; 
-            gap: 15px; 
-            grid-template-columns: 1fr; 
-        }
+        /* Стили для вкладок */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: 1px solid #ddd; border-radius: 20px; background: white; transition: 0.3s; }
+        .tab-btn.active { background: #3498db; color: white; border-color: #3498db; }
 
+        .grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
         @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
-        .card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            /* Исправляет баг "раздувания" карточки */
-            min-width: 0; 
-            box-sizing: border-box;
-        }
-
-        .btn { 
-            display: block; 
-            width: 100%; 
-            padding: 14px 0; /* Убрали горизонтальный отступ */
-            margin-top: 10px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            color: white; 
-            text-align: center; 
-            text-decoration: none; 
-            font-weight: bold; 
-            font-size: 16px; 
-            /* Критично: кнопка не будет вылезать за края */
-            box-sizing: border-box; 
-        }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-width: 0; box-sizing: border-box; }
+        .btn { display: block; width: 100%; padding: 12px 0; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; color: white; text-align: center; text-decoration: none; font-weight: bold; font-size: 14px; box-sizing: border-box; }
         
-        .address-text { 
-            cursor: pointer; 
-            color: #2980b9; 
-            text-decoration: underline; 
-            margin: 10px 0; 
-            font-size: 0.9rem; 
-            word-wrap: break-word; /* Перенос длинного текста */
-        }
-        
+        .address-text { cursor: pointer; color: #2980b9; text-decoration: underline; margin: 10px 0; font-size: 0.9rem; word-wrap: break-word; }
         .btn-maps { background: #e67e22; }
-        .btn-multigo { background: #27ae60; }
-        
-        h3 { margin-top: 0; overflow-wrap: break-word; }
+        .btn-tbank { background: #FFD700; color: #000; } /* Желтая кнопка Т-Банка */
     </style>
 </head>
 <body>
     <h1>Актуальные АЗС</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterStations('Все', this)">Все</button>
+        <button class="tab-btn" onclick="filterStations('Берёзовский', this)">Берёзовский</button>
+        <button class="tab-btn" onclick="filterStations('Екатеринбург', this)">Екатеринбург</button>
+    </div>
+
     <div class="grid" id="list">Загрузка данных...</div>
 
     <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Адрес скопирован!");
-            });
-        }
+        let fullData = [];
 
         fetch('data.json').then(r => r.json()).then(data => {
+            fullData = data;
+            render(data);
+        });
+
+        function filterStations(city, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const filtered = (city === 'Все') ? fullData : fullData.filter(s => s.city === city);
+            render(filtered);
+        }
+
+        function render(data) {
             document.getElementById('list').innerHTML = data.map(azs => `
                 <div class="card">
                     <div>
                         <h3>${azs.name}</h3>
-                        <p class="address-text" onclick="copyToClipboard('${azs.address}')">
-                            📍 ${azs.address}
-                        </p>
+                        <p class="address-text" onclick="copyToClipboard('${azs.address}')">📍 ${azs.address}</p>
                         <small>${azs.info}</small>
                     </div>
                     <div>
                         <a class="btn btn-maps" href="https://yandex.ru/maps/?rtext=~${azs.lat},${azs.lng}" target="_blank">⛽ Открыть на картах</a>
-                        <a class="btn btn-multigo" href="https://multigo.ru/benzin/search_azs/near" target="_blank">💰 MultiGO Топливо</a>
+                        <a class="btn btn-tbank" href="tbank://fuel/map">💰 Т-Банк Топливо</a>
                     </div>
                 </div>
             `).join('');
-        });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => alert("Адрес скопирован!"));
+        }
     </script>
 </body>
 </html>
