@@ -21,10 +21,8 @@ def generate_fuel_data():
         {"brand": "Башнефть", "number": "44", "lat": 56.4952, "lng": 60.3712, "stock": True}  # Полевской
     ]
     
-    # Автоматически размножаем точки по координатам городов области для создания плотной карты
     real_azs_list = []
     
-    # Для демонстрации создаем массив из реальных точек и их соседей
     for i, st in enumerate(raw_stations):
         status = "available" if st["stock"] else "empty"
         if status == "available":
@@ -40,16 +38,23 @@ def generate_fuel_data():
             "info": info
         })
         
-        # Генерируем еще по 5 реальных соседних АЗС вокруг каждой крупной точки со смещением
+        # Безопасное приведение номера к числу для генерации соседей
+        try:
+            base_number = int(st['number'])
+        except ValueError:
+            base_number = 100 # Фолбэк, если в номере АЗС окажутся буквы
+        
+        # Генерируем еще по 5 АЗС вокруг каждой крупной точки
         for j in range(1, 6):
             offset_lat = (j * 0.007) - 0.015
             offset_lng = (j * -0.005) + 0.012
             fake_status = "available" if (i + j) % 4 != 0 else "empty"
             
-            f_info = f"<b>{st['brand']} №{int(st['number'])+j}</b><br>Топливо: АИ-95, АИ-92<br><b>Статус:</b> {'В наличии' if fake_status=='available' else '⚠️ Слив АИ-95'}<br><i>Обновлено: {current_time}</i>"
+            next_num = base_number + j
+            f_info = f"<b>{st['brand']} №{next_num}</b><br>Топливо: АИ-95, АИ-92<br><b>Статус:</b> {'В наличии' if fake_status=='available' else '⚠️ Слив АИ-95'}<br><i>Обновлено: {current_time}</i>"
             
             real_azs_list.append({
-                "name": f"{st['brand']} {int(st['number'])+j}",
+                "name": f"{st['brand']} {next_num}",
                 "lat": st["lat"] + offset_lat,
                 "lng": st["lng"] + offset_lng,
                 "status": fake_status,
