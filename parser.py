@@ -84,8 +84,14 @@ def get_exact_fuel_data():
         {"name": "АГНКС Газпром (Метан)", "city": "Екатеринбург", "lat": 56.794200, "lng": 60.561500, "address": "ул. Академика Вонсовского"}
     ]
     
+# Добавляем инфо-строку и ссылку для каждой станции
     for st in stations:
         st["info"] = f"Обновлено (ЕКБ): {current_time}"
+        
+        # Формируем deeplink для Т-Банка
+        # query передает адрес для поиска в приложении
+        address_encoded = st["address"].replace(" ", "%20")
+        st["tbank_link"] = f"tbank://fuel/map?query={address_encoded}"
 
     with open('data.json', 'w', encoding='utf-8') as f:
         json.dump(stations, f, ensure_ascii=False, indent=4)
