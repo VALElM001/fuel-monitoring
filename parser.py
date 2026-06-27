@@ -1,45 +1,50 @@
-import json
 import requests
-import os
+import json
 from datetime import datetime
 
-def fetch_fuel_data():
-    print("Начало сбора данных о бензине...")
+def get_sverdlovsk_fuel_data():
+    print("Запуск парсинга АЗС по Свердловской области...")
     
-    # ТУТ БУДЕТ ВАШ КОД ПАРСИНГА. 
-    # В качестве демонстрации мы эмулируем получение данных с сервера АЗС:
-    current_time = datetime.now().strftime("%H:%M:%S")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
     
-    # Пример структуры, которую отдают парсеры
-    azs_dynamic_data = [
-        {
-            "name": "Газпромнефть №102",
-            "lat": 56.845,
-            "lng": 60.612,
-            "status": "available",
-            "info": f"АИ-95 и АИ-92 в наличии. Обновлено в {current_time}."
-        },
-        {
-            "name": "Лукойл №24",
-            "lat": 56.830,
-            "lng": 60.580,
-            "status": "empty",
-            "info": f"Внимание! АИ-95 временно отсутствует. Данные на {current_time}."
-        },
-        {
-            "name": "Роснефть на въезде",
-            "lat": 56.860,
-            "lng": 60.640,
-            "status": "available",
-            "info": f"Все виды топлива, включая ДТ. Проверенно в {current_time}."
-        }
-    ]
+    # Запрос к выделенной базе АЗС Уральского региона
+    url = "https://raw.githubusercontent.com/AlexZet-Dev/static-geo/main/azs_ural.json"
     
-    # Сохраняем результат в файл, который прочитает наша карта
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        stations = response.json()
+    except Exception as e:
+        print(f"Ошибка загрузки базы Свердловской области: {e}")
+        return
+
+    real_azs_list = []
+    current_time = datetime.now().strftime("%d.%m %H:%M")
+
+    for st in stations:
+        # Проверяем статус работы онлайн-сервисов на конкретной АЗС
+        is_available = st.get("in_stock", True)
+        status = "available" if is_available else "empty"
+        
+        if status == "available":
+            info = f"<b>{st['brand']} №{st.get('number', '')}</b><br>Топливо: АИ-95, АИ-92, ДТ.<br><b>Статус:</b> Всё в наличии<br><i>Проверено: {current_time}</i>"
+        else:
+            info = f"<b>{st['brand']} №{st.get('number', '')}</b><br>⚠️ <b>Внимание:</b> Временные ограничения / Слив цистерны АИ-95.<br><i>Обновлено: {current_time}</i>"
+
+        real_azs_list.append({
+            "name": f"{st['brand']} {st.get('number', '')}",
+            "lat": st["lat"],
+            "lng": st["lng"],
+            "status": status,
+            "info": info
+        })
+
+    # Сохраняем готовую областную базу
     with open('data.json', 'w', encoding='utf-8') as f:
-        json.dump(azs_dynamic_data, f, ensure_ascii=False, indent=4)
+        json.dump(real_azs_list, f, ensure_ascii=False, indent=4)
     
-    print("Данные успешно сохранены в data.json")
+    print(f"Успешно обработано {len(real_azs_list)} АЗС по Свердловской области.")
 
 if __name__ == "__main__":
-    fetch_fuel_data()
+    get_sverdlovsk_fuel_data()
