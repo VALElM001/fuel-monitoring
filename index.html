@@ -55,13 +55,10 @@
             `).join('');
         }
 
-        function openTBank(url) {
-            const start = Date.now();
-            window.location.href = url;
-            setTimeout(() => {
-                if (Date.now() - start < 1700) {
-                    window.open('https://www.tbank.ru/fuel/', '_blank');
-                }
+        function openTBank() {
+            window.location.href = "tbank://";
+            setTimeout(function() {
+                window.location.href = "https://www.tbank.ru/";
             }, 1500);
         }
 
